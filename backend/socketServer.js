@@ -20,18 +20,25 @@ const registerSocketServer = (server) => {
         // console.log(socket.user)
         authSocket(socket ,next)
     })
-
+    const emitOnlineUsers = () => {
+        const onlineUsers = serverStore.getOnlineUsers();
+        io.emit("online-users", { onlineUsers });
+      };
     //ถ้าผ่านจะไปคอนเน็ก
     io.on('connection', (socket)=>{
        
         console.log(socket.handshake.auth)
         //เวลาที่มี connect มาจะไปเพิ ่มเข้า store
         newConnectionHandler(socket , io)
-
+        emitOnlineUsers()
         socket.on('disconnect',()=>{
             disconnectHandler(socket)
         })
     })
+
+    setInterval(() => {
+        emitOnlineUsers();
+      }, [1000 * 8]);
 }
 
 module.exports = {
